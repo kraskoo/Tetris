@@ -2,6 +2,9 @@
 
 public class Spawner : MonoBehaviour
 {
+    // ReSharper disable once StyleCop.SA1401
+    public static bool IsRunning = true;
+
     // ReSharper disable once StyleCop.SA1307
     // ReSharper disable once InconsistentNaming
     // ReSharper disable once StyleCop.SA1401

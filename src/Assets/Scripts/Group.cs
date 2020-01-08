@@ -31,13 +31,18 @@ public class Group : MonoBehaviour
         if (!this.IsValidGridPos())
         {
             Debug.Log("GAME OVER");
-            GameObject.Destroy(this.gameObject);
+            Spawner.IsRunning = false;
         }
     }
 
     // Update is called once per frame
     public void Update()
     {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            Spawner.IsRunning = !Spawner.IsRunning;
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Q))
         {
             Application.Quit(0);
@@ -46,6 +51,11 @@ public class Group : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.R))
         {
             this.Restart();
+        }
+
+        if (!Spawner.IsRunning)
+        {
+            return;
         }
 
         if (Input.GetKeyDown(KeyCode.LeftArrow))
@@ -90,6 +100,11 @@ public class Group : MonoBehaviour
 
     public void FixedUpdate()
     {
+        if (!Spawner.IsRunning)
+        {
+            return;
+        }
+
         if (this.isLeftPressed)
         {
             this.horizontalCounter++;
@@ -147,6 +162,22 @@ public class Group : MonoBehaviour
 
     private void Restart()
     {
+        int nulls = 0;
+        for (int x = 0; x < Playfield.W; x++)
+        {
+            if (Playfield.Grid[x, 0] == null)
+            {
+                nulls++;
+            }
+        }
+
+        // Check if no one field in grid of first row, then there will be no need to restart
+        if (nulls == Playfield.W || this.IsValidGridPos())
+        {
+            return;
+        }
+
+        Spawner.IsRunning = false;
         for (int x = 0; x < Playfield.W; x++)
         {
             for (int y = 0; y < Playfield.H; y++)
@@ -159,7 +190,7 @@ public class Group : MonoBehaviour
             }
         }
 
-        FindObjectOfType<Spawner>().SpawnNext();
+        Spawner.IsRunning = true;
     }
 
     private void PressDown()
