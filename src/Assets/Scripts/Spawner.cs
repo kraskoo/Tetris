@@ -10,6 +10,8 @@ public class Spawner : MonoBehaviour
     // ReSharper disable once StyleCop.SA1401
     public GameObject[] groups;
 
+    private static readonly System.Random Random = new System.Random();
+
     // Start is called before the first frame update
     public void Start()
     {
@@ -18,9 +20,14 @@ public class Spawner : MonoBehaviour
 
     public void SpawnNext()
     {
-        GameObject.Instantiate(
-            this.groups[Random.Range(0, this.groups.Length)],
+        var figure = GameObject.Instantiate(
+            this.groups[Random.Next(0, this.groups.Length)],
             this.transform.position,
             Quaternion.identity);
+        var rotates = Random.Next(0, 4);
+        for (int i = 0; i < rotates; i++)
+        {
+            figure.transform.Rotate(0, 0, -90);
+        }
     }
 }

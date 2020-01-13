@@ -63,6 +63,8 @@ public class Playfield : MonoBehaviour
         {
             if (IsRowFull(y))
             {
+                Results.Score += 100;
+                LevelText.IncreaseByScore();
                 DeleteRow(y);
                 DecreaseRowsAbove(y + 1);
                 --y;

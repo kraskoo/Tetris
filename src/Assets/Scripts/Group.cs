@@ -2,33 +2,30 @@
 
 public class Group : MonoBehaviour
 {
-    private const int MaxHorizontalCount = 4;
-    private const float MaxFallSpeed = 10f;
-
     private bool isLeftPressed = false;
     private bool isRightPressed = false;
     private bool isDownPressed = false;
 
     private int horizontalCounter = 0;
 
-    private float fallSpeed = 1.5f;
-    private float lastFallSpeed = 1.5f;
+    private float fallSpeed = Constants.InitialFallSpeed;
+    private float lastFallSpeed = Constants.InitialFallSpeed;
     private float lastFall = 0;
 
     public static AudioSource LineRemoval { get; private set; }
 
-    public AudioSource Rotate { get; private set; }
+    public static AudioSource Rotate { get; private set; }
 
     public AudioSource Hit { get; private set; }
 
     public void Start()
     {
         var audioSources = GameObject.FindObjectsOfType<AudioSource>();
-        this.Rotate = audioSources[0];
+        Rotate = audioSources[0];
         this.Hit = audioSources[1];
         LineRemoval = audioSources[2];
 
-        if (!this.IsValidGridPos())
+        if (!this.gameObject.IsValidGridPos())
         {
             Debug.Log("GAME OVER");
             Spawner.IsRunning = false;
@@ -92,6 +89,7 @@ public class Group : MonoBehaviour
             this.isDownPressed = false;
         }
 
+        this.fallSpeed = this.lastFallSpeed = Constants.InitialFallSpeed + (0.25f * Results.Level);
         if (Time.time - this.lastFall >= 1 / this.fallSpeed)
         {
             this.PressDown();
@@ -108,7 +106,7 @@ public class Group : MonoBehaviour
         if (this.isLeftPressed)
         {
             this.horizontalCounter++;
-            if (this.horizontalCounter % MaxHorizontalCount == 0)
+            if (this.horizontalCounter % Constants.MaxHorizontalCount == 0)
             {
                 this.PressLeft();
                 this.horizontalCounter = 0;
@@ -118,7 +116,7 @@ public class Group : MonoBehaviour
         if (this.isRightPressed)
         {
             this.horizontalCounter++;
-            if (this.horizontalCounter % MaxHorizontalCount == 0)
+            if (this.horizontalCounter % Constants.MaxHorizontalCount == 0)
             {
                 this.PressRight();
                 this.horizontalCounter = 0;
@@ -128,7 +126,7 @@ public class Group : MonoBehaviour
         if (this.isDownPressed)
         {
             this.lastFallSpeed = this.fallSpeed;
-            this.fallSpeed = MaxFallSpeed;
+            this.fallSpeed = Constants.MaxFallSpeed;
             this.PressDown();
         }
         else
@@ -137,42 +135,9 @@ public class Group : MonoBehaviour
         }
     }
 
-    public bool IsValidGridPos()
-    {
-        foreach (Transform child in this.transform)
-        {
-            var v = Playfield.RoundVec2(child.position);
-
-            // Not inside Border?
-            if (!Playfield.InsideBorder(v))
-            {
-                return false;
-            }
-
-            // Block in grid cell (and not part of same group)?
-            if (Playfield.Grid[(int)v.x, (int)v.y] != null &&
-                Playfield.Grid[(int)v.x, (int)v.y].parent != this.transform)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     private void Restart()
     {
-        int nulls = 0;
-        for (int x = 0; x < Playfield.W; x++)
-        {
-            if (Playfield.Grid[x, 0] == null)
-            {
-                nulls++;
-            }
-        }
-
-        // Check if no one field in grid of first row, then there will be no need to restart
-        if (nulls == Playfield.W || this.IsValidGridPos())
+        if (this.gameObject.IsValidGridPos())
         {
             return;
         }
@@ -191,6 +156,8 @@ public class Group : MonoBehaviour
         }
 
         Spawner.IsRunning = true;
+        Results.Level = 1;
+        Results.Score = 0;
     }
 
     private void PressDown()
@@ -199,16 +166,23 @@ public class Group : MonoBehaviour
         this.transform.position += new Vector3(0, -1, 0);
 
         // See if valid
-        if (this.IsValidGridPos())
+        if (this.gameObject.IsValidGridPos())
         {
             // It's valid. Update grid.
-            this.UpdateGrid();
+            this.gameObject.UpdateGrid();
         }
         else
         {
+            var lastY = this.transform.localPosition.y;
+            if (lastY > 0)
+            {
+                lastY = 0;
+            }
+
             // It's not valid. revert.
             this.transform.position += new Vector3(0, 1, 0);
             this.Hit.Play();
+            Results.Score += (int)(Constants.MaxAdditionalPoints - lastY);
 
             // Clear filled horizontal lines
             Playfield.DeleteFullRows();
@@ -223,23 +197,7 @@ public class Group : MonoBehaviour
         this.lastFall = Time.time;
     }
 
-    private void PressUp()
-    {
-        this.transform.Rotate(0, 0, -90);
-
-        // See if valid
-        if (this.IsValidGridPos())
-        {
-            // It's valid. Update grid.
-            this.UpdateGrid();
-            this.Rotate.Play();
-        }
-        else
-        {
-            // It's not valid. revert.
-            this.transform.Rotate(0, 0, 90);
-        }
-    }
+    private void PressUp() => this.gameObject.RotateFigure();
 
     private void PressRight()
     {
@@ -247,10 +205,10 @@ public class Group : MonoBehaviour
         this.transform.position += new Vector3(1, 0, 0);
 
         // See if valid
-        if (this.IsValidGridPos())
+        if (this.gameObject.IsValidGridPos())
         {
             // It's valid. Update grid.
-            this.UpdateGrid();
+            this.gameObject.UpdateGrid();
         }
         else
         {
@@ -265,40 +223,15 @@ public class Group : MonoBehaviour
         this.transform.position += new Vector3(-1, 0, 0);
 
         // See if valid
-        if (this.IsValidGridPos())
+        if (this.gameObject.IsValidGridPos())
         {
             // It's valid. Update grid.
-            this.UpdateGrid();
+            this.gameObject.UpdateGrid();
         }
         else
         {
             // It's not valid. revert.
             this.transform.position += new Vector3(1, 0, 0);
-        }
-    }
-
-    private void UpdateGrid()
-    {
-        // Remove old children from grid
-        for (int y = 0; y < Playfield.H; ++y)
-        {
-            for (int x = 0; x < Playfield.W; ++x)
-            {
-                if (Playfield.Grid[x, y] != null)
-                {
-                    if (Playfield.Grid[x, y].parent == this.transform)
-                    {
-                        Playfield.Grid[x, y] = null;
-                    }
-                }
-            }
-        }
-
-        // Add new children to grid
-        foreach (Transform child in this.transform)
-        {
-            var v = Playfield.RoundVec2(child.position);
-            Playfield.Grid[(int)v.x, (int)v.y] = child;
         }
     }
 }
