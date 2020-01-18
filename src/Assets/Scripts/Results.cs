@@ -1,8 +1,8 @@
 ﻿public static class Results
 {
-    // ReSharper disable once StyleCop.SA1401
-    public static int Score = 0;
+    public static int Score { get; set; } = 0;
 
-    // ReSharper disable once StyleCop.SA1401
-    public static int Level = 1;
+    public static int HiddenLevel { get; set; } = 0;
+
+    public static int Level { get; set; } = 1;
 }

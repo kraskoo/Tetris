@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Group : MonoBehaviour
 {
@@ -11,46 +14,29 @@ public class Group : MonoBehaviour
     private float fallSpeed = Constants.InitialFallSpeed;
     private float lastFallSpeed = Constants.InitialFallSpeed;
     private float lastFall = 0;
-
-    public static AudioSource LineRemoval { get; private set; }
-
-    public static AudioSource Rotate { get; private set; }
-
-    public AudioSource Hit { get; private set; }
-
+    
     public void Start()
     {
-        var audioSources = GameObject.FindObjectsOfType<AudioSource>();
-        Rotate = audioSources[0];
-        this.Hit = audioSources[1];
-        LineRemoval = audioSources[2];
-
         if (!this.gameObject.IsValidGridPos())
         {
             Debug.Log("GAME OVER");
-            Spawner.IsRunning = false;
+            Common.IsRunning = false;
+            Common.IsGameStarted = false;
+            SceneManager.LoadScene(3);
         }
     }
 
     // Update is called once per frame
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.P))
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Spawner.IsRunning = !Spawner.IsRunning;
+            Common.IsRunning = false;
+            FindObjectsOfType<GameObject>().ToList().ForEach(go => go.SetActive(false));
+            SceneManager.LoadScene(0, LoadSceneMode.Additive);
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Q))
-        {
-            Application.Quit(0);
-        }
-
-        if (Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.R))
-        {
-            this.Restart();
-        }
-
-        if (!Spawner.IsRunning)
+        if (!Common.IsRunning || !this.gameObject.IsValidGridPos())
         {
             return;
         }
@@ -89,7 +75,7 @@ public class Group : MonoBehaviour
             this.isDownPressed = false;
         }
 
-        this.fallSpeed = this.lastFallSpeed = Constants.InitialFallSpeed + (0.25f * Results.Level);
+        this.fallSpeed = this.lastFallSpeed = Constants.InitialFallSpeed + (Constants.IncreasePerLevel * Results.Level);
         if (Time.time - this.lastFall >= 1 / this.fallSpeed)
         {
             this.PressDown();
@@ -98,12 +84,12 @@ public class Group : MonoBehaviour
 
     public void FixedUpdate()
     {
-        if (!Spawner.IsRunning)
+        if (!Common.IsRunning)
         {
             return;
         }
 
-        if (this.isLeftPressed)
+        if (this.isLeftPressed && !this.isRightPressed)
         {
             this.horizontalCounter++;
             if (this.horizontalCounter % Constants.MaxHorizontalCount == 0)
@@ -113,7 +99,7 @@ public class Group : MonoBehaviour
             }
         }
         
-        if (this.isRightPressed)
+        if (this.isRightPressed && !this.isLeftPressed)
         {
             this.horizontalCounter++;
             if (this.horizontalCounter % Constants.MaxHorizontalCount == 0)
@@ -133,31 +119,6 @@ public class Group : MonoBehaviour
         {
             this.fallSpeed = this.lastFallSpeed;
         }
-    }
-
-    private void Restart()
-    {
-        if (this.gameObject.IsValidGridPos())
-        {
-            return;
-        }
-
-        Spawner.IsRunning = false;
-        for (int x = 0; x < Playfield.W; x++)
-        {
-            for (int y = 0; y < Playfield.H; y++)
-            {
-                if (Playfield.Grid[x, y] != null)
-                {
-                    GameObject.Destroy(Playfield.Grid[x, y].gameObject);
-                    Playfield.Grid[x, y] = null;
-                }
-            }
-        }
-
-        Spawner.IsRunning = true;
-        Results.Level = 1;
-        Results.Score = 0;
     }
 
     private void PressDown()
@@ -181,7 +142,7 @@ public class Group : MonoBehaviour
 
             // It's not valid. revert.
             this.transform.position += new Vector3(0, 1, 0);
-            this.Hit.Play();
+            Common.HitSound.Play();
             Results.Score += (int)(Constants.MaxAdditionalPoints - lastY);
 
             // Clear filled horizontal lines
