@@ -65,6 +65,18 @@ public class Spawner : MonoBehaviour
             figure.RotateF();
         }
 
+        figure.CorrectPositionToBorders(
+            t => t.position.x,
+            (oldP, diff) => new Vector3(oldP.x + diff, oldP.y, oldP.z),
+            (oldP, diff, max) => new Vector3(oldP.x - (diff - max), oldP.y, oldP.z),
+            14f,
+            18f);
+        figure.CorrectPositionToBorders(
+            t => t.position.y,
+            (oldP, diff) => new Vector3(oldP.x, oldP.y + diff, oldP.z),
+            (oldP, diff, max) => new Vector3(oldP.x, oldP.y - (diff - max), oldP.z),
+            11f,
+            15f);
         return figure;
     }
 }

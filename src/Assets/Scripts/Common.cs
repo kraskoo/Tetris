@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 using UnityEngine;
 
@@ -57,6 +58,10 @@ public static class Common
     public static GameObject RotateFigure(this GameObject go)
     {
         go.RotateF();
+        go.CorrectPositionToBorders(
+            t => t.position.x,
+            (oldP, diff) => new Vector3(oldP.x + diff, oldP.y, oldP.z),
+            (oldP, diff, max) => new Vector3(oldP.x - (diff - max), oldP.y, oldP.z));
 
         // See if valid
         if (go.IsValidGridPos())
@@ -185,6 +190,63 @@ public static class Common
         {
             Results.Score = ((Results.HiddenLevel - 1) * 1000) + (Results.Score / 1000);
             Results.Level = Results.HiddenLevel;
+        }
+    }
+
+    public static void CorrectPositionToBorders(
+        this GameObject go,
+        Expression<Func<Transform, float>> prop,
+        Expression<Func<Vector3, float, Vector3>> correctionToMin,
+        Expression<Func<Vector3, float, float, Vector3>> correctionToMax,
+        float min = 0,
+        float max = 9f)
+    {
+        var compiledProperty = prop.Compile();
+        var compiledMin = correctionToMin.Compile();
+        var compiledMax = correctionToMax.Compile();
+        bool isIncorrect = false;
+        bool incorrectInLeft = false;
+        float diffValue = -1;
+        foreach (Transform child in go.transform)
+        {
+            if (compiledProperty(child) < min)
+            {
+                diffValue = Math.Min(diffValue, compiledProperty(child));
+                if (!isIncorrect)
+                {
+                    isIncorrect = true;
+                    incorrectInLeft = true;
+                }
+            }
+            else if (compiledProperty(child) > max)
+            {
+                diffValue = Math.Max(diffValue, compiledProperty(child));
+                if (!isIncorrect)
+                {
+                    isIncorrect = true;
+                }
+            }
+        }
+
+        if (isIncorrect)
+        {
+            if (incorrectInLeft)
+            {
+                diffValue = Math.Abs(diffValue);
+                foreach (Transform child in go.transform)
+                {
+                    var oldPosition = child.position;
+                    child.position = compiledMin(oldPosition, diffValue);
+                }
+            }
+            else
+            {
+                foreach (Transform child in go.transform)
+                {
+                    var oldPosition = child.position;
+                    child.position = compiledMax(oldPosition, diffValue, max);
+                }
+            }
         }
     }
 }
