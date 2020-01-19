@@ -12,8 +12,8 @@ public class Group : MonoBehaviour
     private float lastFallSpeed = Constants.InitialFallSpeed;
     private float lastFall = 0;
     private float sideMovePeriodTime = 0f;
-    private float periodDistance = 0.07f;
-    
+    private float periodDistance = 0.135f;
+
     public void Start()
     {
         this.sideMovePeriodTime = Time.fixedTime + this.periodDistance;
@@ -36,7 +36,7 @@ public class Group : MonoBehaviour
             SceneManager.LoadScene(0, LoadSceneMode.Additive);
         }
 
-        if (!Common.IsRunning || !this.gameObject.IsValidGridPos())
+        if (!Common.IsRunning)
         {
             return;
         }
