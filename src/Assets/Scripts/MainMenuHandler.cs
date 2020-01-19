@@ -66,7 +66,7 @@ public class MainMenuHandler : MonoBehaviour
         switch (text)
         {
             case "Resume":
-                Common.IncreaseByHiddenLevel();
+                Common.SetByHiddenLevel();
                 var mainMenuScene = SceneManager.GetSceneByBuildIndex(0);
                 var gameScene = SceneManager.GetSceneByBuildIndex(1);
                 SceneManager.SetActiveScene(gameScene);

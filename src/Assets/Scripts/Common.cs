@@ -184,11 +184,16 @@ public static class Common
         Results.HiddenLevel = GameOptions.Level;
     }
 
-    public static void IncreaseByHiddenLevel()
+    public static void SetByHiddenLevel()
     {
-        if (Results.HiddenLevel > 1 && Results.HiddenLevel > Results.Level)
+        if (Results.HiddenLevel > Results.Level)
         {
-            Results.Score = ((Results.HiddenLevel - 1) * 1000) + (Results.Score / 1000);
+            Results.Score = ((Results.HiddenLevel - 1) * 1000) + (Results.Score / 10);
+            Results.Level = Results.HiddenLevel;
+        }
+        else
+        {
+            Results.Score = (Results.HiddenLevel - 1) * 1000;
             Results.Level = Results.HiddenLevel;
         }
     }

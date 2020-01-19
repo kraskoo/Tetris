@@ -97,7 +97,7 @@ public class OptionsHandler : MonoBehaviour
         if (Common.IsGameStarted)
         {
             Common.SetupOptions();
-            Common.IncreaseByHiddenLevel();
+            Common.SetByHiddenLevel();
         }
     }
 

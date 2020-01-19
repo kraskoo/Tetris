@@ -20,7 +20,7 @@ public class Spawner : MonoBehaviour
         Common.LineRemovalSound = audioSources[2];
         Common.GameMusic = audioSources[3];
         Common.SetupOptions();
-        Common.IncreaseByHiddenLevel();
+        Common.SetByHiddenLevel();
         if (!Common.IsRunning)
         {
             Common.IsRunning = !Common.IsRunning;
