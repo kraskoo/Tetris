@@ -16,7 +16,7 @@ public class Group : MonoBehaviour
 
     public void Start()
     {
-        this.sideMovePeriodTime = Time.fixedTime + this.periodDistance;
+        this.sideMovePeriodTime = Time.fixedTime + this.periodDistance + (Results.Level * 0.005f);
         if (!this.gameObject.IsValidGridPos())
         {
             Debug.Log("GAME OVER");
@@ -36,16 +36,12 @@ public class Group : MonoBehaviour
             SceneManager.LoadScene(0, LoadSceneMode.Additive);
         }
 
-        if (!Common.IsRunning)
-        {
-            return;
-        }
-
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
             this.isLeftPressed = true;
         }
-        else if (Input.GetKeyUp(KeyCode.LeftArrow))
+        
+        if (Input.GetKeyUp(KeyCode.LeftArrow))
         {
             this.isLeftPressed = false;
         }
@@ -54,7 +50,8 @@ public class Group : MonoBehaviour
         {
             this.isRightPressed = true;
         }
-        else if (Input.GetKeyUp(KeyCode.RightArrow))
+        
+        if (Input.GetKeyUp(KeyCode.RightArrow))
         {
             this.isRightPressed = false;
         }
@@ -68,7 +65,8 @@ public class Group : MonoBehaviour
         {
             this.isDownPressed = true;
         }
-        else if (Input.GetKeyUp(KeyCode.DownArrow))
+        
+        if (Input.GetKeyUp(KeyCode.DownArrow))
         {
             this.isDownPressed = false;
         }
@@ -92,7 +90,7 @@ public class Group : MonoBehaviour
             if (Time.fixedTime >= this.sideMovePeriodTime)
             {
                 this.PressLeft();
-                this.sideMovePeriodTime = Time.fixedTime + this.periodDistance;
+                this.sideMovePeriodTime = Time.fixedTime + this.periodDistance + (Results.Level * 0.005f);
             }
         }
         
@@ -101,7 +99,7 @@ public class Group : MonoBehaviour
             if (Time.fixedTime >= this.sideMovePeriodTime)
             {
                 this.PressRight();
-                this.sideMovePeriodTime = Time.fixedTime + this.periodDistance;
+                this.sideMovePeriodTime = Time.fixedTime + this.periodDistance + (Results.Level * 0.005f);
             }
         }
         

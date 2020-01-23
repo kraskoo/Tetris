@@ -27,6 +27,8 @@ public static class Common
 
     public static bool IsRunning { get; set; } = true;
 
+    public static bool IsLevelChangedManual { get; set; } = false;
+
     public static void IncreaseByScore()
     {
         Results.Level = Convert.ToInt32(Results.Score / 1000) + 1;
@@ -186,6 +188,12 @@ public static class Common
 
     public static void SetByHiddenLevel()
     {
+        if (!IsLevelChangedManual)
+        {
+            return;
+        }
+
+        IsLevelChangedManual = false;
         if (Results.HiddenLevel > Results.Level)
         {
             Results.Score = ((Results.HiddenLevel - 1) * 1000) + (Results.Score / 10);

@@ -14,6 +14,7 @@ public class OptionsHandler : MonoBehaviour
     // Start is called before the first frame update
     public void Start()
     {
+        Cursor.visible = false;
         this.texts = GameObject.FindObjectsOfType<Text>();
         this.sliders = GameObject.FindObjectsOfType<Slider>();
         if (Common.GameOptions == null)
@@ -112,6 +113,7 @@ public class OptionsHandler : MonoBehaviour
                 if (this.level > 1)
                 {
                     this.texts[this.index].text = $"Game Level: {--this.level}";
+                    Common.IsLevelChangedManual = true;
                 }
 
                 break;
@@ -132,6 +134,7 @@ public class OptionsHandler : MonoBehaviour
                 if (this.level < 30)
                 {
                     this.texts[this.index].text = $"Game Level: {++this.level}";
+                    Common.IsLevelChangedManual = true;
                 }
 
                 break;

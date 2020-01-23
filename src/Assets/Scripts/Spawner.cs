@@ -14,6 +14,7 @@ public class Spawner : MonoBehaviour
     // Start is called before the first frame update
     public void Start()
     {
+        Cursor.visible = false;
         var audioSources = GameObject.FindObjectsOfType<AudioSource>();
         Common.RotateSound = audioSources[0];
         Common.HitSound = audioSources[1];

@@ -11,6 +11,7 @@ public class MainMenuHandler : MonoBehaviour
 
     public void Start()
     {
+        Cursor.visible = false;
         if (!OptionsStreamer.IsFileExist())
         {
             OptionsStreamer.SaveOptions(new GameOptions());
@@ -83,6 +84,8 @@ public class MainMenuHandler : MonoBehaviour
                 SceneManager.UnloadSceneAsync(mainMenuScene);
                 return;
             case "New Game":
+                Results.Level = 1;
+                Results.Score = 0;
                 Common.IsGameStarted = true;
                 SceneManager.LoadScene(1);
                 return;

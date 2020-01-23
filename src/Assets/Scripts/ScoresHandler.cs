@@ -11,6 +11,7 @@ public class ScoresHandler : MonoBehaviour
 
     public void Start()
     {
+        Cursor.visible = false;
         if (!ScoresStreamer.IsFileExist())
         {
             ScoresStreamer.SaveOptions(Common.GameScores);
