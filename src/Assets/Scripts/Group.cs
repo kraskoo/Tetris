@@ -128,16 +128,15 @@ public class Group : MonoBehaviour
         }
         else
         {
-            var lastY = this.transform.localPosition.y;
-            if (lastY > 0)
-            {
-                lastY = 0;
-            }
+            var lowestY = (from Transform child in this.gameObject.transform
+                 select child.transform.position.y)
+                    .Concat(new[] { 21f })
+                    .Min() + 2f;
+            Common.HitSound.Play();
+            Results.Score += (int)(Constants.MaxAdditionalPoints - Mathf.Round(lowestY));
 
             // It's not valid. revert.
             this.transform.position += new Vector3(0, 1, 0);
-            Common.HitSound.Play();
-            Results.Score += (int)(Constants.MaxAdditionalPoints - lastY);
 
             // Clear filled horizontal lines
             Playfield.DeleteFullRows();
