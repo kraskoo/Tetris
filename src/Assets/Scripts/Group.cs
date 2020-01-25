@@ -5,18 +5,18 @@ using UnityEngine.SceneManagement;
 
 public class Group : MonoBehaviour
 {
-    private bool isLeftPressed = false;
-    private bool isRightPressed = false;
     private bool isDownPressed = false;
     private float fallSpeed = Constants.InitialFallSpeed;
     private float lastFallSpeed = Constants.InitialFallSpeed;
     private float lastFall = 0;
     private float sideMovePeriodTime = 0f;
-    private float periodDistance = 0.135f;
+    private float periodDistance = 0.300f;
+    private float maxAccelerationDistance = 0.16f;
+    private float accelerationDistance = 0f;
 
     public void Start()
     {
-        this.sideMovePeriodTime = Time.fixedTime + this.periodDistance + (Results.Level * 0.005f);
+        this.sideMovePeriodTime = Time.time + (this.periodDistance - (((36f + Results.Level) / 100) * this.periodDistance) - this.accelerationDistance);
         if (!this.gameObject.IsValidGridPos())
         {
             Debug.Log("GAME OVER");
@@ -31,6 +31,8 @@ public class Group : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            Common.IsLeftPressed = false;
+            Common.IsRightPressed = false;
             Common.IsRunning = false;
             FindObjectsOfType<GameObject>().ToList().ForEach(go => go.SetActive(false));
             SceneManager.LoadScene(0, LoadSceneMode.Additive);
@@ -38,22 +40,24 @@ public class Group : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            this.isLeftPressed = true;
+            Common.IsLeftPressed = true;
         }
         
         if (Input.GetKeyUp(KeyCode.LeftArrow))
         {
-            this.isLeftPressed = false;
+            Common.IsLeftPressed = false;
+            this.accelerationDistance = 0f;
         }
 
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            this.isRightPressed = true;
+            Common.IsRightPressed = true;
         }
         
         if (Input.GetKeyUp(KeyCode.RightArrow))
         {
-            this.isRightPressed = false;
+            Common.IsRightPressed = false;
+            this.accelerationDistance = 0f;
         }
 
         if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -70,7 +74,7 @@ public class Group : MonoBehaviour
         {
             this.isDownPressed = false;
         }
-
+        
         this.fallSpeed = this.lastFallSpeed = Constants.InitialFallSpeed + (Constants.IncreasePerLevel * Results.Level);
         if (Time.time - this.lastFall >= 1 / this.fallSpeed)
         {
@@ -85,21 +89,29 @@ public class Group : MonoBehaviour
             return;
         }
 
-        if (this.isLeftPressed && !this.isRightPressed)
+        if (Common.IsLeftPressed && !Common.IsRightPressed)
         {
-            if (Time.fixedTime >= this.sideMovePeriodTime)
+            if (Time.time >= this.sideMovePeriodTime)
             {
                 this.PressLeft();
-                this.sideMovePeriodTime = Time.fixedTime + this.periodDistance + (Results.Level * 0.005f);
+                this.sideMovePeriodTime = Time.time + (this.periodDistance - (((36f + Results.Level) / 100) * this.periodDistance) - this.accelerationDistance);
+                if (this.accelerationDistance < this.maxAccelerationDistance)
+                {
+                    this.accelerationDistance += 0.04f;
+                }
             }
         }
         
-        if (this.isRightPressed && !this.isLeftPressed)
+        if (Common.IsRightPressed && !Common.IsLeftPressed)
         {
-            if (Time.fixedTime >= this.sideMovePeriodTime)
+            if (Time.time >= this.sideMovePeriodTime)
             {
                 this.PressRight();
-                this.sideMovePeriodTime = Time.fixedTime + this.periodDistance + (Results.Level * 0.005f);
+                this.sideMovePeriodTime = Time.time + (this.periodDistance - (((36f + Results.Level) / 100) * this.periodDistance) - this.accelerationDistance);
+                if (this.accelerationDistance < this.maxAccelerationDistance)
+                {
+                    this.accelerationDistance += 0.04f;
+                }
             }
         }
         
@@ -128,10 +140,9 @@ public class Group : MonoBehaviour
         }
         else
         {
-            var lowestY = (from Transform child in this.gameObject.transform
-                 select child.transform.position.y)
-                    .Concat(new[] { 21f })
-                    .Min() + 2f;
+            var lowestY =
+                (from Transform child in this.gameObject.transform
+                 select child.transform.position.y).Min() + 2f;
             Common.HitSound.Play();
             Results.Score += (int)(Constants.MaxAdditionalPoints - Mathf.Round(lowestY));
 

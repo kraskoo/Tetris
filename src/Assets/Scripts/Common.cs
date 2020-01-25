@@ -23,6 +23,10 @@ public static class Common
 
     public static AudioSource HitSound { get; set; }
 
+    public static bool IsLeftPressed { get; set; } = false;
+
+    public static bool IsRightPressed { get; set; } = false;
+
     public static bool IsGameStarted { get; set; } = false;
 
     public static bool IsRunning { get; set; } = true;
