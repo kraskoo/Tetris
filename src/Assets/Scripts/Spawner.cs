@@ -6,7 +6,10 @@ using Random = System.Random;
 public class Spawner : MonoBehaviour
 {
     // ReSharper disable once StyleCop.SA1401
-    public GameObject[] Groups;
+    public GameObject[] Group;
+
+    // ReSharper disable once StyleCop.SA1401
+    public GameObject[] AdvancedGroup;
 
     private static readonly Random Random = new Random();
 
@@ -39,7 +42,6 @@ public class Spawner : MonoBehaviour
             var current = this.InnerSpawn();
             current.transform.position = this.transform.position;
             var maxY = (from Transform child in current.transform select child.position.y).Max();
-            Debug.Log(maxY);
             if (maxY > 20f)
             {
                 var diff = maxY - 20f;
@@ -58,7 +60,6 @@ public class Spawner : MonoBehaviour
             var current = this.nextFigure;
             current.transform.position = this.transform.position;
             var maxY = (from Transform child in current.transform select child.position.y).Max();
-            Debug.Log(maxY);
             if (maxY > 20f)
             {
                 var diff = maxY - 20f;
@@ -75,24 +76,24 @@ public class Spawner : MonoBehaviour
         }
     }
 
-    private void SetNextFigure()
-    {
-        this.nextFigure = this.InnerSpawn();
-    }
+    private void SetNextFigure() => this.nextFigure = this.InnerSpawn();
 
     private GameObject InnerSpawn()
     {
-        var figure = Behaviour.Instantiate(
-            this.Groups[Random.Next(0, this.Groups.Length)],
-            new Vector3(17, 14, 1),
+        var figure = GameObject.Instantiate(
+            Common.GameOptions.AdvancedFigures ?
+                this.AdvancedGroup[Random.Next(0, this.AdvancedGroup.Length)] :
+                this.Group[Random.Next(0, this.Group.Length)],
+            new Vector3(17f, 14f, 1f),
             Quaternion.identity);
-        figure.GetComponent<MonoBehaviour>().enabled = false;
+
         var rotates = Random.Next(0, 4);
+        figure.GetComponent<MonoBehaviour>().enabled = false;
         for (int i = 0; i < rotates; i++)
         {
             figure.RotateF();
         }
-
+        
         figure.CorrectPositionToBorders(
             t => t.position.y,
             (oldP, diff) => new Vector3(oldP.x, oldP.y + diff, oldP.z),

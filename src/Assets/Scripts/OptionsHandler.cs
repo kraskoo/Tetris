@@ -6,8 +6,9 @@ using UnityEngine.UI;
 
 public class OptionsHandler : MonoBehaviour
 {
-    private int index = 2;
+    private int index = 0;
     private int level = 0;
+    private bool advancedFigures;
     private Text[] texts;
     private Slider[] sliders;
 
@@ -16,6 +17,13 @@ public class OptionsHandler : MonoBehaviour
     {
         Cursor.visible = false;
         this.texts = GameObject.FindObjectsOfType<Text>();
+        var tempTexts = new Text[this.texts.Length];
+        tempTexts[0] = this.texts.FirstOrDefault(t => t.name == "Level");
+        tempTexts[1] = this.texts.FirstOrDefault(t => t.name == "AdvancedFigures");
+        tempTexts[2] = this.texts.FirstOrDefault(t => t.name == "Sound");
+        tempTexts[3] = this.texts.FirstOrDefault(t => t.name == "Music");
+        tempTexts[4] = this.texts.FirstOrDefault(t => t.name == "Back");
+        this.texts = tempTexts;
         this.sliders = GameObject.FindObjectsOfType<Slider>();
         if (Common.GameOptions == null)
         {
@@ -23,10 +31,12 @@ public class OptionsHandler : MonoBehaviour
         }
 
         this.level = Common.GameOptions.Level;
+        this.advancedFigures = Common.GameOptions.AdvancedFigures;
         this.sliders[0].value = Common.GameOptions.SoundVolume * 100;
         this.sliders[1].value = Common.GameOptions.MusicVolume * 100;
         this.texts[this.index].text = $"{this.texts[this.index].text} {this.level}";
         this.texts[this.index].color = Color.yellow;
+        this.texts[1].text = $"Advanced Figures: {(this.advancedFigures ? "Enable" : "Disable")}";
     }
 
     // Update is called once per frame
@@ -35,14 +45,14 @@ public class OptionsHandler : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             var previousIndex = this.index;
-            this.IncreaseIndex();
+            this.DecreaseIndex();
             this.ChangeColors(previousIndex);
         }
 
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             var previousIndex = this.index;
-            this.DecreaseIndex();
+            this.IncreaseIndex();
             this.ChangeColors(previousIndex);
         }
 
@@ -58,7 +68,7 @@ public class OptionsHandler : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            if (this.index == 3)
+            if (this.index == 4)
             {
                 this.SaveNewOptionsAndAssign();
                 this.BackToMenuScene();
@@ -92,6 +102,7 @@ public class OptionsHandler : MonoBehaviour
     private void SaveNewOptionsAndAssign()
     {
         Common.GameOptions.Level = this.level;
+        Common.GameOptions.AdvancedFigures = this.advancedFigures;
         Common.GameOptions.SoundVolume = this.sliders[0].value / 100f;
         Common.GameOptions.MusicVolume = this.sliders[1].value / 100f;
         OptionsStreamer.SaveOptions(Common.GameOptions);
@@ -102,14 +113,16 @@ public class OptionsHandler : MonoBehaviour
         }
     }
 
-    // Game Level - 2
-    // Sound Volume - 1
-    // Music Volume - 0
+    // Game Level - 0
+    // Advanced Figures - 1
+    // Sound Volume - 2
+    // Music Volume - 3
+    // Back - 4
     private void PressLeftArrow()
     {
         switch (this.index)
         {
-            case 2:
+            case 0:
                 if (this.level > 1)
                 {
                     this.texts[this.index].text = $"Game Level: {--this.level}";
@@ -118,9 +131,14 @@ public class OptionsHandler : MonoBehaviour
 
                 break;
             case 1:
+                this.advancedFigures = !this.advancedFigures;
+                this.texts[this.index].text = $"Advanced Figures: {(this.advancedFigures ? "Enable" : "Disable")}";
+                Common.IsLevelChangedManual = true;
+                break;
+            case 2:
                 this.sliders[0].value -= 10;
                 break;
-            case 0:
+            case 3:
                 this.sliders[1].value -= 10;
                 break;
         }
@@ -130,7 +148,7 @@ public class OptionsHandler : MonoBehaviour
     {
         switch (this.index)
         {
-            case 2:
+            case 0:
                 if (this.level < 30)
                 {
                     this.texts[this.index].text = $"Game Level: {++this.level}";
@@ -139,9 +157,14 @@ public class OptionsHandler : MonoBehaviour
 
                 break;
             case 1:
+                this.advancedFigures = !this.advancedFigures;
+                this.texts[this.index].text = $"Advanced Figures: {(this.advancedFigures ? "Enable" : "Disable")}";
+                Common.IsLevelChangedManual = true;
+                break;
+            case 2:
                 this.sliders[0].value += 10;
                 break;
-            case 0:
+            case 3:
                 this.sliders[1].value += 10;
                 break;
         }
