@@ -4,7 +4,11 @@ public class Playfield : MonoBehaviour
 {
     public static Vector2 RoundVec2(Vector2 v) => new Vector2(Mathf.Round(v.x), Mathf.Round(v.y));
 
-    public static bool InsideBorder(Vector2 pos) => (int)pos.x >= 0 && (int)pos.x < Constants.GridWidth && (int)pos.y >= 0;
+    public static bool InsideBorder(Vector2 pos) =>
+        (int)pos.x >= 0 &&
+        (int)pos.x < Constants.GridWidth &&
+        (int)pos.y >= 0 &&
+        (int)pos.y < Constants.GridHeight;
 
     public static void DeleteRow(int y)
     {

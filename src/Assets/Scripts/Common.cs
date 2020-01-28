@@ -33,10 +33,7 @@ public static class Common
 
     public static bool IsLevelChangedManual { get; set; } = false;
 
-    public static void IncreaseByScore()
-    {
-        Results.Level = Convert.ToInt32(Results.Score / 1000) + 1;
-    }
+    public static void IncreaseByScore() => Results.Level = Convert.ToInt32(Results.Score / 1000) + 1;
 
     public static bool IsValidGridPos(this GameObject go)
     {
@@ -64,6 +61,12 @@ public static class Common
     public static GameObject RotateFigure(this GameObject go)
     {
         go.RotateF();
+        go.CorrectPositionToBorders(
+            t => t.position.y,
+            (oldP, diff) => new Vector3(oldP.x, oldP.y + diff, oldP.z),
+            (oldP, diff, max) => new Vector3(oldP.x, oldP.y - (diff - max), oldP.z),
+            0f,
+            19f);
         go.CorrectPositionToBorders(
             t => t.position.x,
             (oldP, diff) => new Vector3(oldP.x + diff, oldP.y, oldP.z),
